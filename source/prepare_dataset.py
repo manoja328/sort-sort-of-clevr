@@ -4,16 +4,16 @@ import json
 import random
 import cPickle as pickle
 
-skipthought_path = "/home/nmhkahn/Works/skip-thoughts/"
+skipthought_path = "path/to/skipthought/directory/"
+dataset_dir = "path/to/dataset/directory/"
+
 os.chdir(skipthought_path)
 sys.path.insert(0, skipthought_path)
-
 import skipthoughts
 
 model = skipthoughts.load_model()
 encoder = skipthoughts.Encoder(model)
 
-dataset_dir = "/home/nmhkahn/Datasets/sort-sort-of-clevr/"
 with open(os.path.join(dataset_dir, "dataset.json")) as _file:
     dataset = json.load(_file)
 
