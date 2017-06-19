@@ -9,11 +9,11 @@ from questions import *
 
 def circle(color, position):
     return gizeh.circle(20, fill=color, xy=position, stroke_width=2)
-    
+
 
 def square(color, position):
     return gizeh.square(40, fill=color, xy=position, stroke_width=2)
-    
+
 
 def star(color, position):
     real_position = [position[0]+0, position[1]+1]
@@ -40,7 +40,22 @@ shapes = {
     "triangle": triangle,
     "star": star,
 }
-    
+
+colors_idx = {
+    "red":    1,
+    "green":  2,
+    "blue":   3,
+    "ornage": 4,
+    "gray":   5,
+    "yellow": 6
+}
+shapes_idx = {
+    "circle": 1,
+    "square": 2,
+    "triangle": 3,
+    "star": 4,
+}
+
 num_dataset = 10000
 num_questions = 10
 num_captions = 10
@@ -56,12 +71,12 @@ def create_board():
         empty_indices = [(i, j) for i in range(len(board)) \
                                 for j in range(len(board[0])) if board[i][j] == "bg"]
         random_index = random.choice(empty_indices)
-    
+
         noise_pos = random.randint(0, 30)
-        draw_pos = [random_index[1]*(256-padding)/3 + padding+noise_pos, 
+        draw_pos = [random_index[1]*(256-padding)/3 + padding+noise_pos,
                     random_index[0]*(256-padding)/3 + padding+noise_pos]
         shape(color, draw_pos).draw(surface)
-    
+
         board[random_index[0]][random_index[1]] = [draw_pos, " ".join([color_key, shape_key])]
 
     return board, surface
@@ -70,7 +85,7 @@ def create_board():
 def create_questions(board):
     non_rel_fns = [question_shape, question_position, question_count]
     rel_fns = [question_rel_closet, question_rel_furthest, question_rel_count]
-    
+
     n = 0
     non_rel_questions, non_rel_answers = list(), list()
     q_board = [(board[i][j][0], board[i][j][1], [0]*6, (i, j)) \
@@ -90,13 +105,13 @@ def create_questions(board):
             continue
         n += 1
         if n >= num_questions: break
-    
+
     n = 0
     rel_questions, rel_answers = list(), list()
     q_board = [(board[i][j][0], board[i][j][1], [0]*6, (i, j)) \
                for i in range(3) for j in range(3) if board[i][j] != "bg"]
     q_shape = {"square":0, "circle":0, "star":0, "triangle":0}
-    
+
     while True:
         fn = random.choice(rel_fns)
         try:
@@ -114,7 +129,7 @@ def create_questions(board):
 def create_captions(board):
     non_rel_fns = [caption_shape, caption_position, caption_count]
     rel_fns = [caption_rel_closet, caption_rel_furthest, caption_rel_count]
-    
+
     n = 0
     non_rel_captions = list()
     q_board = [(board[i][j][0], board[i][j][1], [0]*6, (i, j)) \
@@ -138,7 +153,7 @@ def create_captions(board):
     q_board = [(board[i][j][0], board[i][j][1], [0]*6, (i, j)) \
                for i in range(3) for j in range(3) if board[i][j] != "bg"]
     q_shape = {"square":0, "circle":0, "star":0, "triangle":0}
-    
+
     while True:
         fn = random.choice(rel_fns)
         try:
@@ -152,28 +167,42 @@ def create_captions(board):
 
 def main():
     dataset = list()
-    for i in range(num_dataset):
-        if i % 500 == 0: print(i)
+    for n in range(num_dataset):
+        if n % 500 == 0: print(n)
         board, surface = create_board()
+
+        # convert board data into vector [color, shape]
+        board_vec = [[[] for _ in range(3)] for _ in range(3)]
+        for i in range(3):
+            for j in range(3):
+                board_vec[i][j] += [0]*2
+                if board[i][j] == "bg":
+                    continue
+
+                color, shape = board[i][j][1].split()
+                board_vec[i][j][0] = colors_idx[color]
+                board_vec[i][j][1] = shapes_idx[shape]
+
         non_rel_q, non_rel_a, rel_q, rel_a = create_questions(board)
         non_rel_c, rel_c = create_captions(board)
 
-        im_path = "images/image_{}.png".format(i)
+        im_path = "images/image_{}.png".format(n)
         surface.write_to_png(im_path)
-        
+
         data = OrderedDict()
-        data["image"] = im_path
-        data["non_rel_q"]   = non_rel_q
-        data["non_rel_ans"] = non_rel_a
-        data["rel_q"]   = rel_q
-        data["rel_ans"] = rel_a
-        data["non_rel_cap"] = non_rel_c
-        data["rel_cap"]     = rel_c
+        data["path"] = im_path
+        data["board"] = board_vec
+        data["non_rel_question"] = non_rel_q
+        data["non_rel_answer"] = non_rel_a
+        data["rel_question"] = rel_q
+        data["rel_answer"] = rel_a
+        data["non_rel_caption"] = non_rel_c
+        data["rel_caption"] = rel_c
         dataset.append(data)
 
     with open("dataset.json", "w") as _file:
-        json.dump(dataset, _file, indent=4)
-    
+        json.dump(dataset, _file)
+
 
 if __name__ == "__main__":
     main()
