@@ -19,18 +19,19 @@ with open(os.path.join(dataset_dir, "dataset.json")) as _file:
 
 new_data = list()
 for data in dataset:
-    im_path = os.path.join(dataset_dir, data["image"])
-    text = data["non_rel_q"] + data["rel_q"] + data["non_rel_cap"] + data["rel_cap"]
+    im_path = os.path.join(dataset_dir, data["path"])
+    text = data["non_rel_question"] + data["rel_question"] +
+           data["non_rel_caption"] + data["rel_caption"]
     enc_vec = encoder.encode(text, verbose=False)
 
     datum = {
         "path": im_path,
-        "non_rel_q": enc_vec[:10, 2400:], # use only biskip
-        "rel_q": enc_vec[10:20, 2400:],
-        "non_rel_cap": enc_vec[20:30, 2400:],
-        "rel_cap": enc_vec[30:, 2400:],
-        "non_rel_ans": data["non_rel_ans"],
-        "rel_ans": data["rel_ans"]
+        "non_rel_question": enc_vec[:10, 2400:], # use only biskip
+        "rel_question": enc_vec[10:20, 2400:],
+        "non_rel_caption": enc_vec[20:30, 2400:],
+        "rel_caption": enc_vec[30:, 2400:],
+        "non_rel_answer": data["non_rel_ans"],
+        "rel_answer": data["rel_answer"]
     }
     new_data.append(datum)
 
