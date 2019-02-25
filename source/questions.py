@@ -10,7 +10,7 @@ non_relational = {
 
 relational = {
     "q_closet":   ["What is the shape of the object that is closet to the <color> object?",
-                   "What is the color of the object that is colset to the <color> object?"],
+                   "What is the color of the object that is closet to the <color> object?"],
     "q_furthest": ["What is the shape of the object that is furthest to the <color> object?",
                    "What is the color of the object that is furthest to the <color> object?"],
     "q_count":    ["How many objects have the shape of the <color> object?"]

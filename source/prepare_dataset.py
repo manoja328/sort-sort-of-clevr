@@ -20,7 +20,7 @@ with open(os.path.join(dataset_dir, "dataset.json")) as _file:
 new_data = list()
 for data in dataset:
     im_path = os.path.join(dataset_dir, data["path"])
-    text = data["non_rel_question"] + data["rel_question"] +
+    text = data["non_rel_question"] + data["rel_question"] +\
            data["non_rel_caption"] + data["rel_caption"]
     enc_vec = encoder.encode(text, verbose=False)
 
