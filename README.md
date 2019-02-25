@@ -10,4 +10,4 @@ This is repository for sort-sort-of-clevr dataset creation. My dataset follow [s
 
 ## (Optional) Embed sentences with skipthoughts
 
-`source/prepare_dataset.py` will do this thing. Before run this code, you must replace some paths in this file such as `dataset_dir`.
+Run `python source/prepare_dataset.py` will do this thing. Before run this code, you must replace some paths in this file such as `dataset_dir`.
