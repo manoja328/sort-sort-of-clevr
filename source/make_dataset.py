@@ -3,6 +3,8 @@ import random
 import gizeh
 import scipy.misc as misc
 from collections import OrderedDict
+from tqdm import tqdm
+import os
 
 from captions import *
 from questions import *
@@ -45,7 +47,7 @@ colors_idx = {
     "red":    1,
     "green":  2,
     "blue":   3,
-    "ornage": 4,
+    "orange": 4,
     "gray":   5,
     "yellow": 6
 }
@@ -57,17 +59,40 @@ shapes_idx = {
 }
 
 num_dataset = 10000
-num_questions = 10
-num_captions = 10
+num_questions = 5
+num_captions = 1
+
+
+#def create_board():
+#    padding = 25
+#    board = [["bg" for i in range(3)] for j in range(3)]
+#    surface = gizeh.Surface(width=256, height=256, bg_color=(0.8, 0.8, 0.8))
+#
+#    for color_key, color in colors.items():
+#        shape_key, shape = random.choice(list(shapes.items()))
+#        empty_indices = [(i, j) for i in range(len(board)) \
+#                                for j in range(len(board[0])) if board[i][j] == "bg"]
+#        random_index = random.choice(empty_indices)
+#
+#        noise_pos = random.randint(0, 30)
+#        draw_pos = [random_index[1]*(256-padding)/3 + padding+noise_pos,
+#                    random_index[0]*(256-padding)/3 + padding+noise_pos]
+#        shape(color, draw_pos).draw(surface)
+#
+#        board[random_index[0]][random_index[1]] = [draw_pos, " ".join([color_key, shape_key])]
+#
+#    return board, surface
 
 
 def create_board():
+    
     padding = 25
     board = [["bg" for i in range(3)] for j in range(3)]
     surface = gizeh.Surface(width=256, height=256, bg_color=(0.8, 0.8, 0.8))
 
-    for color_key, color in colors.items():
+    for i in range(random.choice(range(5,10))):
         shape_key, shape = random.choice(list(shapes.items()))
+        color_key, color = random.choice(list(colors.items()))
         empty_indices = [(i, j) for i in range(len(board)) \
                                 for j in range(len(board[0])) if board[i][j] == "bg"]
         random_index = random.choice(empty_indices)
@@ -80,11 +105,13 @@ def create_board():
         board[random_index[0]][random_index[1]] = [draw_pos, " ".join([color_key, shape_key])]
 
     return board, surface
+    
+    
 
 
 def create_questions(board):
-    non_rel_fns = [question_shape, question_position, question_count]
-    rel_fns = [question_rel_closet, question_rel_furthest, question_rel_count]
+    non_rel_fns = [question_count,question_count2,question_count]
+    rel_fns = [question_rel_count]
 
     n = 0
     non_rel_questions, non_rel_answers = list(), list()
@@ -99,8 +126,9 @@ def create_questions(board):
                 question, answer = fn(q_board, q_shape)
             else:
                 question, answer = fn(q_board)
-            non_rel_questions.append(question)
-            non_rel_answers.append(answer)
+                if not question in non_rel_questions:
+                    non_rel_questions.append(question)
+                    non_rel_answers.append(answer)
         except BaseException as e:
             continue
         n += 1
@@ -116,8 +144,9 @@ def create_questions(board):
         fn = random.choice(rel_fns)
         try:
             question, answer = fn(q_board)
-            rel_questions.append(question)
-            rel_answers.append(answer)
+            if not question in rel_questions:
+                rel_questions.append(question)
+                rel_answers.append(answer)
         except BaseException as e:
             continue
         n += 1
@@ -167,8 +196,12 @@ def create_captions(board):
 
 def main():
     dataset = list()
-    for n in range(num_dataset):
-        if n % 500 == 0: print(n)
+    
+    if not os.path.exists('images'):
+        os.mkdir('images')
+    
+    for n in tqdm(range(num_dataset)):
+#        if n % 500 == 0: print(n)
         board, surface = create_board()
 
         # convert board data into vector [color, shape]
@@ -184,7 +217,7 @@ def main():
                 board_vec[i][j][1] = shapes_idx[shape]
 
         non_rel_q, non_rel_a, rel_q, rel_a = create_questions(board)
-        non_rel_c, rel_c = create_captions(board)
+#        non_rel_c, rel_c = create_captions(board)
 
         im_path = "images/image_{}.png".format(n)
         surface.write_to_png(im_path)
@@ -196,8 +229,8 @@ def main():
         data["non_rel_answer"] = non_rel_a
         data["rel_question"] = rel_q
         data["rel_answer"] = rel_a
-        data["non_rel_caption"] = non_rel_c
-        data["rel_caption"] = rel_c
+#        data["non_rel_caption"] = non_rel_c
+#        data["rel_caption"] = rel_c
         dataset.append(data)
 
     with open("dataset.json", "w") as _file:

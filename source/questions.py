@@ -1,11 +1,12 @@
 import math
 import random
-
+from collections import defaultdict
 non_relational = {
     "q_shape": ["What is the shape of the <color> object?"],
     "q_pos"  : ["Is the <color> object on the <pos>?", 
                 "Where is <color> object?"],
-    "q_count": ["How many <shape> objects are there?"]
+    "q_count": ["How many <shape> objects are there?"],
+    "q_count2": ["How many <color> objects are there?"]
 }
 
 relational = {
@@ -155,20 +156,48 @@ def question_rel_furthest(q_board):
     
 def question_rel_count(q_board):
     available = [(elem[0], elem[1]) for elem in q_board if elem[2][5] == 0]
-    obj = random.choice(available)
+    
+    color2shape  = defaultdict(list)
+    for elem in available:
+        color, shape = elem[1].split()
+        color2shape[color].append(shape)
+    
+    objcolors = set([ k for k,v in color2shape.items() if len(set(v))==1])   
+    validobjs = [ (elem[0], elem[1]) for elem in available if elem[1].split()[0] in objcolors] 
+    
+    if len(validobjs)==0:
+        return None,None
+    
+    
+    obj = random.choice(validobjs)
+    obj_color,obj_shape = obj[1].split()
     
     question = relational["q_count"][0]
-    question = question.replace("<color>", obj[1].split()[0])
+    question = question.replace("<color>", obj_color)
     
     counter = {"square": 0,"circle": 0,"star": 0,"triangle": 0}
     for elem in available:
         shape = elem[1].split()[1]
         counter[shape] += 1
         
-    answer = str(counter[obj[1].split()[1]])
-
-    for i, e in enumerate(q_board):
-        if obj[0] == e[0]:
-            q_board[i][2][5] = 1
+    answer = str(counter[obj_shape])
 
     return question, answer
+
+
+def question_count2(q_board):
+    available = [(elem[0], elem[1]) for elem in q_board if elem[2][5] == 0]
+    obj = random.choice(available)
+    
+    question = non_relational["q_count2"][0]
+    question = question.replace("<color>", obj[1].split()[0])
+    
+    counter = {"red": 0,"green": 0,"blue": 0,"orange": 0 ,"gray": 0,"yellow": 0}
+    for elem in available:
+        color = elem[1].split()[0]
+        counter[color] += 1
+        
+    answer = str(counter[obj[1].split()[0]])
+
+    return question, answer
+

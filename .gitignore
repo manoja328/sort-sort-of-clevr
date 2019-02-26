@@ -1,4 +1,5 @@
 *.json
 *.pkl
 *.swp
+images/
 __pycache__
