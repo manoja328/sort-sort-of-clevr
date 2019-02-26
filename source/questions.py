@@ -181,7 +181,6 @@ def question_rel_count(q_board):
         counter[shape] += 1
         
     answer = str(counter[obj_shape])
-
     return question, answer
 
 
@@ -189,15 +188,19 @@ def question_count2(q_board):
     available = [(elem[0], elem[1]) for elem in q_board if elem[2][5] == 0]
     obj = random.choice(available)
     
-    question = non_relational["q_count2"][0]
-    question = question.replace("<color>", obj[1].split()[0])
-    
     counter = {"red": 0,"green": 0,"blue": 0,"orange": 0 ,"gray": 0,"yellow": 0}
+    
+    obj_color = random.choice(list(counter.keys()))
+    
+    question = non_relational["q_count2"][0]
+    question = question.replace("<color>", obj_color)
+    
+    
     for elem in available:
         color = elem[1].split()[0]
         counter[color] += 1
         
-    answer = str(counter[obj[1].split()[0]])
+    answer = str(counter[obj_color])
 
     return question, answer
 

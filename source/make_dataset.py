@@ -59,8 +59,8 @@ shapes_idx = {
 }
 
 num_dataset = 10000
-num_questions = 5
-num_captions = 1
+num_questions = 2
+num_captions = 2
 
 
 #def create_board():
@@ -86,9 +86,10 @@ num_captions = 1
 
 def create_board():
     
+    W, H = 224 , 224
     padding = 25
     board = [["bg" for i in range(3)] for j in range(3)]
-    surface = gizeh.Surface(width=256, height=256, bg_color=(0.8, 0.8, 0.8))
+    surface = gizeh.Surface(width=W, height=H, bg_color=(0.8, 0.8, 0.8))
 
     for i in range(random.choice(range(5,10))):
         shape_key, shape = random.choice(list(shapes.items()))
@@ -98,8 +99,8 @@ def create_board():
         random_index = random.choice(empty_indices)
 
         noise_pos = random.randint(0, 30)
-        draw_pos = [random_index[1]*(256-padding)/3 + padding+noise_pos,
-                    random_index[0]*(256-padding)/3 + padding+noise_pos]
+        draw_pos = [random_index[1]*(W-padding)/3 + padding+noise_pos,
+                    random_index[0]*(W-padding)/3 + padding+noise_pos]
         shape(color, draw_pos).draw(surface)
 
         board[random_index[0]][random_index[1]] = [draw_pos, " ".join([color_key, shape_key])]
@@ -129,9 +130,10 @@ def create_questions(board):
                 if not question in non_rel_questions:
                     non_rel_questions.append(question)
                     non_rel_answers.append(answer)
+                    n += 1
         except BaseException as e:
             continue
-        n += 1
+        
         if n >= num_questions: break
 
     n = 0
